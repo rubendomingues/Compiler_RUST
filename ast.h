@@ -9,10 +9,12 @@ typedef struct _cmd Cmd;
 struct _Expr {
   enum {
     E_INTEGER,
+    E_FLOAT,
     E_OPERATION
   } kind;
   union {
     int valueInt; // for integer values
+    float valueFloat;
     struct {
       int operator; // PLUS, MINUS, etc
       struct _Expr* left;

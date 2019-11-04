@@ -39,6 +39,7 @@
 // Types/values in association to grammar symbols.
 %union {
   int intValue;
+  float floatValue;
   char* charValue;
   Expr* exprValue;
   BoolExpr* boolValue;
@@ -66,9 +67,7 @@
   Expr* root;
 }
 %%
-program: expr { root = $1; }
-
-program: expr { root = $1; }
+program: cmd_expr { root = $1; }
 expr:
   INT {
     $$ = ast_integer($1);
@@ -130,7 +129,7 @@ bool_expr:
   ;
 
 cmd_expr:
-  ATRIB VAR TOKEN_EQ expr SM {
+  ATRIB VAR TOKEN_EQ INT SM {
     $$ = ast_ATRIB($2,$4);
   }
   |
@@ -148,6 +147,10 @@ cmd_expr:
   |
   READ VAR {
     $$ = ast_READ($2);
+  }
+  |
+  PRINT VAR{
+    $$ = ast_PRINT($2);
   }
   ;
   %%
