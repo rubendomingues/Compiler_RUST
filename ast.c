@@ -10,13 +10,6 @@ Expr* ast_integer(int v) {
   return node;
 }
 
-Expr* ast_float(float v){
-  Expr* node = (Expr*) malloc(sizeof(Expr));
-  node->kind = E_FLOAT;
-  node->attr.valueFloat = v;
-  return node;
-}
-
 Expr* ast_operation
 (int operator, Expr* left, Expr* right) {
   Expr* node = (Expr*) malloc(sizeof(Expr));
@@ -43,7 +36,7 @@ BoolExpr* ast_exp(int operator, Expr* left, Expr* right){
   return node;
 }
 
-Cmd* ast_ATRIB(char* var, int v){
+Cmd* ast_ATRIB(char* var, Expr* v){
   Cmd* node = (Cmd*)malloc(sizeof(Cmd));
   node->kind = E_ATRIB;
   node->attr.let.var = var;
@@ -51,15 +44,15 @@ Cmd* ast_ATRIB(char* var, int v){
   return node;
 }
 
-Cmd* ast_IF(BoolExpr* cond, Cmd* comando){
+Cmd* ast_IF(BoolExpr* cond, Cmd_list* comando){
   Cmd* node = (Cmd*)malloc(sizeof(Cmd));
   node->kind = E_IF;
-  node->attr.op.cond = cond;
-  node->attr.op.comando = comando;
+  node->attr.ifT.cond = cond;
+  node->attr.ifT.list = comando;
   return node;
 }
 
-Cmd* ast_IF_ELSE(BoolExpr* cond, Cmd* comando_if, Cmd* comando_else){
+Cmd* ast_IF_ELSE(BoolExpr* cond, Cmd_list* comando_if, Cmd_list* comando_else){
   Cmd* node = (Cmd*)malloc(sizeof(Cmd));
   node->kind = E_IF_ELSE;
   node->attr.if_else.cond = cond;
@@ -69,11 +62,11 @@ Cmd* ast_IF_ELSE(BoolExpr* cond, Cmd* comando_if, Cmd* comando_else){
 
 }
 
-Cmd* ast_WHILE(BoolExpr* cond, Cmd* comando){
+Cmd* ast_WHILE(BoolExpr* cond, Cmd_list* comando){
   Cmd* node = (Cmd*)malloc(sizeof(Cmd));
   node->kind = E_WHILE;
-  node->attr.op.cond = cond;
-  node->attr.op.comando = comando;
+  node->attr.whileT.cond = cond;
+  node->attr.whileT.list = comando;
   return node;
 }
 
@@ -89,4 +82,13 @@ Cmd* ast_READ(char* var){
   node->kind = E_READ;
   node->attr.str = var;
   return node;
+}
+
+//---------------
+Cmd_list* newCmdList(Cmd* head, Cmd_list* tail){
+  Cmd_list* lista = malloc(sizeof(struct list));
+  lista->elem=head;
+  lista->next=tail;
+  return lista;
+
 }

@@ -20,11 +20,14 @@
   PRINT
   NOT_EQ
   ATRIB
+  OPENPAR
+  CLOSEPAR
   KEY1
   KEY2
   SM
   TOKEN_EQ
   VAR
+  MAIN
 
 // Operator associativity and precedence
 %left FALSE TRUE
@@ -39,18 +42,19 @@
 // Types/values in association to grammar symbols.
 %union {
   int intValue;
-  float floatValue;
   char* charValue;
   Expr* exprValue;
   BoolExpr* boolValue;
   Cmd* cmdValue;
+  Cmd_list* cmdSequence;
 }
 
 %type <intValue> INT
 %type <charValue> VAR
 %type <exprValue> expr
 %type <boolValue> bool_expr
-%type <cmdValue> cmd_expr
+%type <cmdValue> cmd
+%type <cmdSequence> cmdlist
 
 // Use "%code requires" to make declarations go
 // into both parser.c and parser.h
@@ -64,10 +68,11 @@
   extern char* yytext;
   extern FILE* yyin;
   extern void yyerror(const char* msg);
-  Expr* root;
+  Cmd_list* root;
 }
 %%
-program: cmd_expr { root = $1; }
+// program: MAIN OPENPAR CLOSEPAR KEY1 cmdlist KEY2 { root = $5; }
+program: cmdlist { root = $1; }
 expr:
   INT {
     $$ = ast_integer($1);
@@ -128,29 +133,39 @@ bool_expr:
   }
   ;
 
-cmd_expr:
-  ATRIB VAR TOKEN_EQ INT SM {
+cmd:
+  ATRIB VAR TOKEN_EQ expr SM {
     $$ = ast_ATRIB($2,$4);
   }
   |
-  IF bool_expr KEY1 cmd_expr KEY2 ELSE KEY1 cmd_expr KEY2 SM {
-    $$ = ast_IF_ELSE($2,$4,$8);
+  IF OPENPAR bool_expr KEY1 cmdlist KEY2 CLOSEPAR ELSE KEY1 cmdlist KEY2 SM {
+    $$ = ast_IF_ELSE($3,$5,$10);
   }
   |
-  IF bool_expr KEY1 cmd_expr KEY2 SM {
-    $$ = ast_IF($2,$4);
+  IF OPENPAR bool_expr KEY1 cmdlist CLOSEPAR KEY2 SM {
+    $$ = ast_IF($3,$5);
   }
   |
-  WHILE bool_expr KEY1 cmd_expr KEY2 SM {
-    $$ = ast_WHILE($2,$4);
+  WHILE OPENPAR bool_expr CLOSEPAR KEY1 cmdlist KEY2 SM {
+    $$ = ast_WHILE($3,$6);
   }
   |
-  READ VAR {
-    $$ = ast_READ($2);
+  READ OPENPAR VAR CLOSEPAR SM{
+    $$ = ast_READ($3);
   }
   |
-  PRINT VAR{
-    $$ = ast_PRINT($2);
+  PRINT OPENPAR VAR CLOSEPAR SM{
+    $$ = ast_PRINT($3);
+  }
+  ;
+
+cmdlist:
+  cmd {
+    $$ = newCmdList($1, NULL);
+  }
+  |
+  cmd SM cmdlist {
+    $$ = newCmdList($1,$3);
   }
   ;
   %%

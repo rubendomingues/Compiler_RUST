@@ -18,10 +18,6 @@ int yyline = 1;
    yylval.intValue = atoi(yytext);
    return INT;
 }
-[a-z][a-zA-Z]* {
-	yylval.charValue = yytext;
-	return VAR;
-}
 "TRUE" { return TRUE; }
 "FALSE" {return FALSE; }
 "+" { return PLUS; }
@@ -38,12 +34,20 @@ int yyline = 1;
 "if" { return IF; }
 "else" { return ELSE; }
 "while" { return WHILE; }
-"print" { return PRINT; }
+"print!" { return PRINT; }
 "read" { return READ; }
-"let" {return ATRIB; }
+"let" { return ATRIB; }
+"fn main" { return MAIN; }
+"(" { return OPENPAR; }
+")" { return CLOSEPAR; }
 "{" { return KEY1; }
 "}" { return KEY2; }
 ";" { return SM; }
 "=" { return TOKEN_EQ; }
+
+[a-z][a-zA-Z]* {
+	yylval.charValue = yytext;
+	return VAR;
+}
 .  { yyerror("unexpected character"); }
 %%
