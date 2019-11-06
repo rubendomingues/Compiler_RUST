@@ -74,6 +74,10 @@
 //dprogram: MAIN OPENPAR CLOSEPAR KEY1 cmdlist KEY2 { root = $5; }
 program: cmdlist { root = $1; }
 expr:
+  VAR {
+    $$ = ast_variable($1);
+  }
+  |
   INT {
     $$ = ast_integer($1);
   }
@@ -142,15 +146,15 @@ cmd:
     $$ = ast_ATRIB($2,$4);
   }
   |
-  IF OPENPAR bool_expr CLOSEPAR KEY1 cmdlist KEY2  {
+  IF OPENPAR bool_expr CLOSEPAR KEY1 cmdlist KEY2 SM {
     $$ = ast_IF($3,$6);
   }
   |
-  IF OPENPAR bool_expr CLOSEPAR KEY1 cmdlist KEY2 ELSE KEY1 cmdlist KEY2  {
+  IF OPENPAR bool_expr CLOSEPAR KEY1 cmdlist KEY2 ELSE KEY1 cmdlist KEY2 SM {
     $$ = ast_IF_ELSE($3,$6,$10);
   }
   |
-  WHILE OPENPAR bool_expr CLOSEPAR KEY1 cmdlist KEY2 {
+  WHILE OPENPAR bool_expr CLOSEPAR KEY1 cmdlist KEY2 SM {
     $$ = ast_WHILE($3,$6);
   }
   |

@@ -2,33 +2,49 @@
 #include <stdlib.h>
 #include "parser.h"
 #include "interpreter.h"
+
+void tabPrint(int tab){
+  for(int i=0; i<tab; i++){
+    printf("  ");
+  }
+}
+
 void exprPrint(Expr* expr, int tab){
   if (expr == 0) {
     yyerror("Null expression!!");
   }
+  else if (expr->kind == E_STRING) {
+    tabPrint(tab);
+    printf("%s\n", expr->attr.valueString);
+  }
   else if (expr->kind == E_INTEGER) {
     // result = expr->attr.value;
-    printf("integer\n");
+    tabPrint(tab);
+    printf("%d\n", expr->attr.valueInt);
   }
   else if (expr->kind == E_OPERATION) {
     switch (expr->attr.op.operator) {
       case PLUS:
-        printf("Plus\n");
+        tabPrint(tab);
+        printf("PLUS\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case MINUS:
-        printf("Minus\n");
+        tabPrint(tab);
+        printf("MINUS\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case MOD:
-        printf("Mod\n");
+        tabPrint(tab);
+        printf("MOD\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case DIV:
-        printf("Div\n");
+        tabPrint(tab);
+        printf("DIV\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
@@ -45,37 +61,44 @@ void boolPrint(BoolExpr* expr, int tab) {
   }
   else if (expr->kind == BOOLEANO) {
     // result = expr->attr.value;
-    printf("booleano\n");
+    tabPrint(tab);
+    printf("BOOL\n");
   }
   else if (expr->kind == EXP) {
     switch (expr->attr.op.operator) {
       case GT:
-        printf("Greater\n");
+        tabPrint(tab);
+        printf("GREATER\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case LT:
-        printf("Lower\n");
+        tabPrint(tab);
+        printf("LOWER\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case GTE:
-        printf("GreaterEqual\n");
+        tabPrint(tab);
+        printf("GREATER OR EQUAL\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case LTE:
-        printf("LowerEqual\n");
+        tabPrint(tab);
+        printf("LOWER OR EQUAL\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case EQ:
-        printf("Equal\n");
+        tabPrint(tab);
+        printf("EQUAL\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case NOT_EQ:
-        printf("NotEqual\n");
+        tabPrint(tab);
+        printf("NOT EQUAL\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
@@ -90,37 +113,52 @@ void boolPrint(BoolExpr* expr, int tab) {
 void cmdPrint(Cmd* comand, int tab){
   switch(comand->kind){
     case E_READ:
-      printf("read\n");
+      tabPrint(tab);
+      printf("READ\n");
+      tabPrint(tab+1);
+      printf("%s\n", comand->attr.str);
       break;
     case E_MAIN:
-      printf("main\n");
-      cmdListPrint(comand->attr.funcT.list, tab+1);
+      tabPrint(tab);
+      printf("MAIN\n");
+      cmdListPrint(comand->attr.funcT.list, tab);
       break;
     case E_FUNC:
-      printf("func\n");
-      cmdListPrint(comand->attr.funcT.list, tab+1);
+      tabPrint(tab);
+      printf("FUNC\n");
+      cmdListPrint(comand->attr.funcT.list, tab);
       break;
     case E_ATRIB:
-      printf("atrib\n");
+      tabPrint(tab);
+      printf("ATRIB\n");
+      tabPrint(tab+1);
+      printf("%s\n", comand->attr.let.var);
+      exprPrint(comand->attr.let.value,tab+1);
       break;
     case E_IF:
-      printf("if\n");
+      tabPrint(tab);
+      printf("IF\n");
       boolPrint(comand->attr.ifT.cond, tab+1);
-      cmdListPrint(comand->attr.ifT.list, tab+1);
+      cmdListPrint(comand->attr.ifT.list, tab);
       break;
     case E_IF_ELSE:
-      printf("if_else\n");
+      tabPrint(tab);
+      printf("IF THEN ELSE\n");
       boolPrint(comand->attr.if_else.cond, tab+1);
-      cmdListPrint(comand->attr.if_else.comando_if, tab+1);
-      cmdListPrint(comand->attr.if_else.comando_else, tab+1);
+      cmdListPrint(comand->attr.if_else.comando_if, tab);
+      cmdListPrint(comand->attr.if_else.comando_else, tab);
       break;
     case E_WHILE:
-      printf("while\n");
+      tabPrint(tab);
+      printf("WHILE\n");
       boolPrint(comand->attr.whileT.cond, tab+1);
-      cmdListPrint(comand->attr.whileT.list, tab+1);
+      cmdListPrint(comand->attr.whileT.list, tab);
       break;
     case E_PRINT:
-      printf("print\n");
+      tabPrint(tab);
+      printf("PRINT\n");
+      tabPrint(tab+1);
+      printf("%s\n", comand->attr.str);
       break;
     default:
      yyerror("Unknown operator!");
@@ -145,7 +183,7 @@ int main(int argc, char** argv) {
   } //  yyin = stdin
   if (yyparse() == 0) {
   //    printf("Result = %d\n", eval(root));
-  cmdListPrint(root, 0);
+  cmdListPrint(root, -1);
   }
   return 0;
 

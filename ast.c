@@ -11,7 +11,12 @@ Expr* ast_integer(int v) {
   node->attr.valueInt = v;
   return node;
 }
-
+Expr* ast_variable(char* s){
+  Expr* node = (Expr*) malloc(sizeof(Expr));
+  node->kind = E_STRING;
+  node->attr.valueString = s;
+  return node;
+}
 Expr* ast_operation
 (int operator, Expr* left, Expr* right) {
   Expr* node = (Expr*) malloc(sizeof(Expr));

@@ -16,10 +16,12 @@ typedef struct list{
 struct _Expr {
   enum {
     E_INTEGER,
+    E_STRING,
     E_OPERATION
   } kind;
   union {
     int valueInt; // for integer values
+    char* valueString;
     struct {
       int operator; // PLUS, MINUS, etc
       struct _Expr* left;
@@ -90,6 +92,7 @@ Cmd_list* newCmdList(Cmd* head, Cmd_list* tail);
 
 // Constructor functions (see implementation in ast.c)
 Expr* ast_integer(int v);
+Expr* ast_variable(char* s);
 Expr* ast_operation(int operator, Expr* left, Expr* right);
 BoolExpr* ast_booleano(int v);
 BoolExpr* ast_exp(int operator, Expr* left, Expr* right);
