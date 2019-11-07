@@ -106,3 +106,10 @@ Cmd_list* newCmdList(Cmd* head, Cmd_list* tail){
   lista->next=tail;
   return lista;
 }
+
+argList* newArgList(argmts* arg, argList* tail){
+  argList* lista = malloc(sizeof(struct arglist));
+  lista->arg = arg;
+  lista->next = tail;
+  return lista;
+}

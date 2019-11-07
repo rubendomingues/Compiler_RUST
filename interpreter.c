@@ -26,25 +26,25 @@ void exprPrint(Expr* expr, int tab){
     switch (expr->attr.op.operator) {
       case PLUS:
         tabPrint(tab);
-        printf("PLUS\n");
+        printf("+\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case MINUS:
         tabPrint(tab);
-        printf("MINUS\n");
+        printf("-\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case MOD:
         tabPrint(tab);
-        printf("MOD\n");
+        printf("%c\n",'%');
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case DIV:
         tabPrint(tab);
-        printf("DIV\n");
+        printf("/\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
@@ -68,37 +68,37 @@ void boolPrint(BoolExpr* expr, int tab) {
     switch (expr->attr.op.operator) {
       case GT:
         tabPrint(tab);
-        printf("GREATER\n");
+        printf(">\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case LT:
         tabPrint(tab);
-        printf("LOWER\n");
+        printf("<\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case GTE:
         tabPrint(tab);
-        printf("GREATER OR EQUAL\n");
+        printf(">=\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case LTE:
         tabPrint(tab);
-        printf("LOWER OR EQUAL\n");
+        printf("<=\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case EQ:
         tabPrint(tab);
-        printf("EQUAL\n");
+        printf("==\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
       case NOT_EQ:
         tabPrint(tab);
-        printf("NOT EQUAL\n");
+        printf("!=\n");
         exprPrint(expr->attr.op.left, tab+1);
         exprPrint(expr->attr.op.right, tab+1);
         break;
@@ -112,51 +112,53 @@ void boolPrint(BoolExpr* expr, int tab) {
 
 void cmdPrint(Cmd* comand, int tab){
   switch(comand->kind){
-    case E_READ:
-      tabPrint(tab);
-      printf("READ\n");
-      tabPrint(tab+1);
-      printf("%s\n", comand->attr.str);
-      break;
     case E_MAIN:
       tabPrint(tab);
-      printf("MAIN\n");
+      printf("fn main()\n");
       cmdListPrint(comand->attr.funcT.list, tab);
       break;
     case E_FUNC:
       tabPrint(tab);
-      printf("FUNC\n");
+      printf("fun %s()\n", comand->attr.funcT.function);
       cmdListPrint(comand->attr.funcT.list, tab);
+      break;
+    case E_READ:
+      tabPrint(tab);
+      printf("read_line()\n");
+      tabPrint(tab+1);
+      printf("%s\n", comand->attr.str);
       break;
     case E_ATRIB:
       tabPrint(tab);
-      printf("ATRIB\n");
+      printf("let\n");
       tabPrint(tab+1);
       printf("%s\n", comand->attr.let.var);
       exprPrint(comand->attr.let.value,tab+1);
       break;
     case E_IF:
       tabPrint(tab);
-      printf("IF\n");
+      printf("if\n");
       boolPrint(comand->attr.ifT.cond, tab+1);
       cmdListPrint(comand->attr.ifT.list, tab);
       break;
     case E_IF_ELSE:
       tabPrint(tab);
-      printf("IF THEN ELSE\n");
+      printf("if\n");
       boolPrint(comand->attr.if_else.cond, tab+1);
       cmdListPrint(comand->attr.if_else.comando_if, tab);
+      tabPrint(tab);
+      printf("else\n");
       cmdListPrint(comand->attr.if_else.comando_else, tab);
       break;
     case E_WHILE:
       tabPrint(tab);
-      printf("WHILE\n");
+      printf("while\n");
       boolPrint(comand->attr.whileT.cond, tab+1);
       cmdListPrint(comand->attr.whileT.list, tab);
       break;
     case E_PRINT:
       tabPrint(tab);
-      printf("PRINT\n");
+      printf("print_line!()\n");
       tabPrint(tab+1);
       printf("%s\n", comand->attr.str);
       break;
@@ -172,6 +174,7 @@ void cmdListPrint(Cmd_list* cmdList, int tab){
     cmdList = cmdList->next;
   }
 }
+
 int main(int argc, char** argv) {
   --argc; ++argv;
   if (argc != 0) {

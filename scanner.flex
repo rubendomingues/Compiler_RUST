@@ -34,10 +34,11 @@ int yyline = 1;
 "if" { return IF; }
 "else" { return ELSE; }
 "while" { return WHILE; }
-"print!" { return PRINT; }
-"read" { return READ; }
+"println!" { return PRINT; }
+"read_line" { return READ; }
 "let" { return ATRIB; }
 "fn" { return FUNC; }
+"&" { return COM; }
 "(" { return OPENPAR; }
 ")" { return CLOSEPAR; }
 "{" { return KEY1; }

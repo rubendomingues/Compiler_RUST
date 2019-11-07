@@ -5,7 +5,7 @@
 typedef struct _BoolExpr BoolExpr;
 typedef struct _Expr Expr; // Convenience typedef
 typedef struct _cmd Cmd;
-
+typedef struct Argm argmts;
 //LISTA DE COMANDOS
 typedef struct list{
   Cmd* elem;
@@ -86,10 +86,22 @@ struct _cmd {
   } attr;
 };
 
+struct Argm{
+  enum{
+    A_INT,
+    A_STRING,
+    A_VEC,
+  }kind;
+  char* name;
+};
 
+typedef struct arglist{
+  argmts* arg;
+  struct arglist* next;
+}argList;
+
+argList* newArgList(argmts* arg, argList* tail);
 Cmd_list* newCmdList(Cmd* head, Cmd_list* tail);
-
-
 // Constructor functions (see implementation in ast.c)
 Expr* ast_integer(int v);
 Expr* ast_variable(char* s);

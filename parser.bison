@@ -28,6 +28,7 @@
   TOKEN_EQ
   VAR
   FUNC
+  COM
 
 // Operator associativity and precedence
 %left FALSE TRUE
@@ -71,7 +72,7 @@
   Cmd_list* root;
 }
 %%
-//dprogram: MAIN OPENPAR CLOSEPAR KEY1 cmdlist KEY2 { root = $5; }
+//program: MAIN OPENPAR CLOSEPAR KEY1 cmdlist KEY2 { root = $5; }
 program: cmdlist { root = $1; }
 expr:
   VAR {
@@ -146,20 +147,20 @@ cmd:
     $$ = ast_ATRIB($2,$4);
   }
   |
-  IF OPENPAR bool_expr CLOSEPAR KEY1 cmdlist KEY2 SM {
-    $$ = ast_IF($3,$6);
+  IF bool_expr KEY1 cmdlist KEY2 {
+    $$ = ast_IF($2,$4);
   }
   |
-  IF OPENPAR bool_expr CLOSEPAR KEY1 cmdlist KEY2 ELSE KEY1 cmdlist KEY2 SM {
-    $$ = ast_IF_ELSE($3,$6,$10);
+  IF bool_expr KEY1 cmdlist KEY2 ELSE KEY1 cmdlist KEY2 {
+    $$ = ast_IF_ELSE($2,$4,$8);
   }
   |
-  WHILE OPENPAR bool_expr CLOSEPAR KEY1 cmdlist KEY2 SM {
-    $$ = ast_WHILE($3,$6);
+  WHILE bool_expr KEY1 cmdlist KEY2 {
+    $$ = ast_WHILE($2,$4);
   }
   |
-  READ OPENPAR VAR CLOSEPAR SM{
-    $$ = ast_READ($3);
+  READ OPENPAR COM VAR CLOSEPAR SM{
+    $$ = ast_READ($4);
   }
   |
   PRINT OPENPAR VAR CLOSEPAR SM{
