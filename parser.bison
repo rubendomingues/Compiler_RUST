@@ -29,6 +29,9 @@
   VAR
   FUNC
   COM
+  VIRG
+  STRING
+
 
 // Operator associativity and precedence
 %left FALSE TRUE
@@ -52,6 +55,7 @@
 
 %type <intValue> INT
 %type <charValue> VAR
+%type <charValue> STRING
 %type <exprValue> expr
 %type <boolValue> bool_expr
 %type <cmdValue> cmd
@@ -165,6 +169,10 @@ cmd:
   |
   PRINT OPENPAR VAR CLOSEPAR SM{
     $$ = ast_PRINT($3);
+  }
+  |
+  PRINT OPENPAR STRING VIRG VAR CLOSEPAR SM{
+    $$ = ast_PRINT_STRING($3,$5);
   }
   ;
 
