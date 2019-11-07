@@ -52,6 +52,7 @@ struct _cmd {
     E_IF_ELSE,
     E_WHILE,
     E_PRINT,
+    E_PSTR,
     E_READ,
     E_FUNC,
     E_MAIN
@@ -82,25 +83,29 @@ struct _cmd {
       Cmd_list* comando_if;
       Cmd_list* comando_else;
     } if_else;
+    struct {
+      char* string;
+      char* var;
+    } string_var;
     char* str;
   } attr;
 };
 
-struct Argm{
-  enum{
-    A_INT,
-    A_STRING,
-    A_VEC,
-  }kind;
-  char* name;
-};
-
-typedef struct arglist{
-  argmts* arg;
-  struct arglist* next;
-}argList;
-
-argList* newArgList(argmts* arg, argList* tail);
+// struct Argm{
+//   enum{
+//     A_INT,
+//     A_STRING,
+//     A_VEC,
+//   }kind;
+//   char* name;
+// };
+//
+// typedef struct arglist{
+//   argmts* arg;
+//   struct arglist* next;
+// }argList;
+//
+// argList* newArgList(argmts* arg, argList* tail);
 Cmd_list* newCmdList(Cmd* head, Cmd_list* tail);
 // Constructor functions (see implementation in ast.c)
 Expr* ast_integer(int v);
@@ -115,4 +120,5 @@ Cmd* ast_WHILE(BoolExpr* cond, Cmd_list* comando);
 Cmd* ast_PRINT(char* str);
 Cmd* ast_READ(char* var);
 Cmd* ast_function(char* var,Cmd_list* comando);
+Cmd* ast_PRINT_STRING(char* string, char* var);
 #endif

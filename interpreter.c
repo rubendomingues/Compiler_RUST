@@ -162,6 +162,14 @@ void cmdPrint(Cmd* comand, int tab){
       tabPrint(tab+1);
       printf("%s\n", comand->attr.str);
       break;
+    case E_PSTR:
+      tabPrint(tab);
+      printf("print_line!()\n");
+      tabPrint(tab+1);
+      printf("%s\n", comand->attr.string_var.string);
+      tabPrint(tab+1);
+      printf("%s\n", comand->attr.string_var.var);
+      break;
     default:
      yyerror("Unknown operator!");
      break;

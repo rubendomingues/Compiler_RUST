@@ -31,6 +31,7 @@ int yyline = 1;
 "<=" { return LTE; }
 "==" { return EQ; }
 "!=" { return NOT_EQ; }
+"," { return VIRG; }
 "if" { return IF; }
 "else" { return ELSE; }
 "while" { return WHILE; }
@@ -45,6 +46,11 @@ int yyline = 1;
 "}" { return KEY2; }
 ";" { return SM; }
 "=" { return TOKEN_EQ; }
+
+\".*\" {
+  yylval.charValue = strdup(yytext);
+  return STRING;
+}
 
 [a-z][a-zA-Z]* {
 	yylval.charValue = strdup(yytext);
