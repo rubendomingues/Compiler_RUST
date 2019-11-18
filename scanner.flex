@@ -18,8 +18,8 @@ int yyline = 1;
    yylval.intValue = atoi(yytext);
    return INT;
 }
-"TRUE" { return TRUE; }
-"FALSE" {return FALSE; }
+"true" { return TRUE; }
+"false" {return FALSE; }
 "+" { return PLUS; }
 "-" { return MINUS; }
 "*" { return TIMES; }
@@ -28,6 +28,8 @@ int yyline = 1;
 ">" { return GT; }
 "<" { return LT; }
 ">=" { return GTE; }
+"&&" { return AND; }
+"||" { return OR; }
 "<=" { return LTE; }
 "==" { return EQ; }
 "!=" { return NOT_EQ; }
@@ -39,6 +41,7 @@ int yyline = 1;
 "read_line" { return READ; }
 "let" { return ATRIB; }
 "fn" { return FUNC; }
+"main" { return MAIN; }
 "&" { return COM; }
 "(" { return OPENPAR; }
 ")" { return CLOSEPAR; }

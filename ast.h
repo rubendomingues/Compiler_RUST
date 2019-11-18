@@ -5,12 +5,13 @@
 typedef struct _BoolExpr BoolExpr;
 typedef struct _Expr Expr; // Convenience typedef
 typedef struct _cmd Cmd;
-typedef struct Argm argmts;
+
 //LISTA DE COMANDOS
 typedef struct list{
   Cmd* elem;
   struct list *next;
 }Cmd_list;
+
 
 // AST for expressions
 struct _Expr {
@@ -32,6 +33,8 @@ struct _Expr {
 
 struct _BoolExpr {
   enum {
+    BOOL_BOOL,
+    EXP_BOOLEANO,
     BOOLEANO,
     EXP
   } kind;
@@ -42,6 +45,16 @@ struct _BoolExpr {
       struct _Expr* left;
       struct _Expr* right;
     } op; // for binary expressions
+    struct {
+      int operator;
+      struct _Expr* left;
+      int value;
+    } exp_b;
+    struct {
+      int operator; // PLUS, MINUS, etc
+      struct _BoolExpr* left;
+      struct _BoolExpr* right;
+    } boolen;
   } attr;
 };
 
@@ -53,15 +66,9 @@ struct _cmd {
     E_WHILE,
     E_PRINT,
     E_PSTR,
-    E_READ,
-    E_FUNC,
-    E_MAIN
+    E_READ
   } kind;
   union {
-    struct {
-      char* function;
-      Cmd_list* list;
-    } funcT;
     struct {
       BoolExpr* cond;
       Cmd_list* list;
@@ -91,34 +98,20 @@ struct _cmd {
   } attr;
 };
 
-// struct Argm{
-//   enum{
-//     A_INT,
-//     A_STRING,
-//     A_VEC,
-//   }kind;
-//   char* name;
-// };
-//
-// typedef struct arglist{
-//   argmts* arg;
-//   struct arglist* next;
-// }argList;
-//
-// argList* newArgList(argmts* arg, argList* tail);
 Cmd_list* newCmdList(Cmd* head, Cmd_list* tail);
 // Constructor functions (see implementation in ast.c)
 Expr* ast_integer(int v);
 Expr* ast_variable(char* s);
 Expr* ast_operation(int operator, Expr* left, Expr* right);
+BoolExpr* ast_bool_bool(int operator, BoolExpr* left, BoolExpr* right);
 BoolExpr* ast_booleano(int v);
 BoolExpr* ast_exp(int operator, Expr* left, Expr* right);
+BoolExpr* ast_exp_bool(int operator, Expr* left, int v);
 Cmd* ast_ATRIB(char* var, Expr* v);
 Cmd* ast_IF(BoolExpr* cond, Cmd_list* comando);
 Cmd* ast_IF_ELSE(BoolExpr* cond, Cmd_list* comando_if, Cmd_list* comando_else);
 Cmd* ast_WHILE(BoolExpr* cond, Cmd_list* comando);
 Cmd* ast_PRINT(char* str);
 Cmd* ast_READ(char* var);
-Cmd* ast_function(char* var,Cmd_list* comando);
 Cmd* ast_PRINT_STRING(char* string, char* var);
 #endif

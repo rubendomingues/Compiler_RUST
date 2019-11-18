@@ -31,11 +31,14 @@
   COM
   VIRG
   STRING
+  AND
+  MAIN
+  OR
 
 
 // Operator associativity and precedence
 %left FALSE TRUE
-%left GT LT GTE LTE EQ NOT_EQ
+%left AND OR GT LT GTE LTE EQ NOT_EQ
 %left PLUS MINUS
 %left TIMES DIV
 %left MOD
@@ -67,6 +70,7 @@
   #include <stdio.h>
   #include <stdlib.h>
   #include "ast.h"
+  #include "hash.h"
 
   extern int yylex();
   extern int yyline;
@@ -76,8 +80,8 @@
   Cmd_list* root;
 }
 %%
-//program: MAIN OPENPAR CLOSEPAR KEY1 cmdlist KEY2 { root = $5; }
-program: cmdlist { root = $1; }
+program: FUNC MAIN OPENPAR CLOSEPAR KEY1 cmdlist KEY2 { root = $6; }
+//program: cmdlist { root = $1; }
 expr:
   VAR {
     $$ = ast_variable($1);
@@ -133,6 +137,30 @@ bool_expr:
     $$ = ast_exp(NOT_EQ, $1, $3);
   }
   |
+  expr EQ TRUE{
+    $$ = ast_exp_bool(EQ, $1, 1);
+  }
+  |
+  expr EQ FALSE{
+    $$ = ast_exp_bool(EQ, $1, 0);
+  }
+  |
+  expr NOT_EQ TRUE{
+    $$ = ast_exp_bool(NOT_EQ, $1, 1);
+  }
+  |
+  expr NOT_EQ FALSE{
+    $$ = ast_exp_bool(NOT_EQ, $1, 0);
+  }
+  |
+  bool_expr AND bool_expr{
+    $$ = ast_bool_bool(AND,$1,$3);
+  }
+  |
+  bool_expr OR bool_expr{
+    $$ = ast_bool_bool(OR,$1,$3);
+  }
+  |
   FALSE {
     $$ = ast_booleano(0);
   }
@@ -143,12 +171,9 @@ bool_expr:
   ;
 
 cmd:
-  FUNC VAR OPENPAR CLOSEPAR KEY1 cmdlist KEY2 {
-    $$ = ast_function($2,$6);
-  }
-  |
   ATRIB VAR TOKEN_EQ expr SM {
     $$ = ast_ATRIB($2,$4);
+    insert($2,$4);
   }
   |
   IF bool_expr KEY1 cmdlist KEY2 {
@@ -167,7 +192,7 @@ cmd:
     $$ = ast_READ($4);
   }
   |
-  PRINT OPENPAR VAR CLOSEPAR SM{
+  PRINT OPENPAR STRING CLOSEPAR SM{
     $$ = ast_PRINT($3);
   }
   |
@@ -186,7 +211,6 @@ cmdlist:
   }
   ;
   %%
-
 //said where is the error
 void yyerror(const char* err) {
   printf("Line %d: %s - '%s'\n", yyline, err, yytext);

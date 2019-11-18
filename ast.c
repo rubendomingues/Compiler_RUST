@@ -17,6 +17,7 @@ Expr* ast_variable(char* s){
   node->attr.valueString = strdup(s);
   return node;
 }
+
 Expr* ast_operation
 (int operator, Expr* left, Expr* right) {
   Expr* node = (Expr*) malloc(sizeof(Expr));
@@ -40,6 +41,24 @@ BoolExpr* ast_exp(int operator, Expr* left, Expr* right){
   node->attr.op.operator = operator;
   node->attr.op.left = left;
   node->attr.op.right = right;
+  return node;
+}
+
+BoolExpr* ast_exp_bool(int operator, Expr* left, int v){
+  BoolExpr* node = (BoolExpr*) malloc(sizeof(BoolExpr));
+  node->kind = EXP_BOOLEANO;
+  node->attr.exp_b.operator = operator;
+  node->attr.exp_b.left = left;
+  node->attr.exp_b.value = v;
+  return node;
+}
+
+BoolExpr* ast_bool_bool(int operator, BoolExpr* left, BoolExpr* right){
+  BoolExpr* node = (BoolExpr*) malloc(sizeof(BoolExpr));
+  node->kind = BOOL_BOOL;
+  node->attr.boolen.operator = operator;
+  node->attr.boolen.left = left;
+  node->attr.boolen.right = right;
   return node;
 }
 
@@ -83,6 +102,7 @@ Cmd* ast_PRINT(char* str){
   node->attr.str = strdup(str);
   return node;
 }
+
 Cmd* ast_PRINT_STRING(char* str, char* var){
   Cmd* node = (Cmd*)malloc(sizeof(Cmd));
   node->kind = E_PSTR;
@@ -97,15 +117,7 @@ Cmd* ast_READ(char* var){
   node->attr.str = strdup(var);
   return node;
 }
-Cmd* ast_function(char* var,Cmd_list* comando){
-  Cmd* node = (Cmd*)malloc(sizeof(Cmd));
-  if(strcmp(var,"main")==0)
-    node->kind = E_MAIN;
-  else
-    node->kind = E_FUNC;
-  node->attr.funcT.function = strdup(var);
-  node->attr.funcT.list = comando;
-}
+
 //---------------
 Cmd_list* newCmdList(Cmd* head, Cmd_list* tail){
   Cmd_list* lista = malloc(sizeof(struct list));
@@ -114,9 +126,5 @@ Cmd_list* newCmdList(Cmd* head, Cmd_list* tail){
   return lista;
 }
 
-// argList* newArgList(argmts* arg, argList* tail){
-//   argList* lista = malloc(sizeof(struct arglist));
-//   lista->arg = arg;
-//   lista->next = tail;
-//   return lista;
-// }
+
+//----------------
