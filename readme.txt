@@ -1,2 +1,2 @@
 compile: make
-exec: ./interpreter "nome do ficheiro"
+exec: ./interpreter "name of text file"
