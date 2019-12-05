@@ -1,5 +1,5 @@
 
-OBJS=scanner.o parser.o ast.o interpreter.o printAbsTree.o hash.o
+OBJS=scanner.o parser.o ast.o interpreter.o printAbsTree.o hash.o label.o code.o
 INTERM=scanner.c parser.c parser.h
 PROGRAM=./interpreter
 CFLAGS=-g
@@ -16,4 +16,3 @@ $(PROGRAM): $(OBJS)
 	$(CC) -o $(PROGRAM) $(OBJS)
 clean:
 	rm -f $(PROGRAM) $(OBJS) $(INTERM)
-
