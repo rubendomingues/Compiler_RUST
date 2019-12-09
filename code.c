@@ -1,6 +1,5 @@
 #include "code.h"
 int k=1;
-int labelpos = 0;
 //Atom constructor
 Atom* makeVar(char* var){
   Atom* a = malloc(sizeof(Atom));
@@ -213,11 +212,9 @@ Instr_list* compileExpr(Expr* e, char* r){
 }
 
 // //NOT FINISHED
-Instr_list* compileBool(BoolExpr* e, char* r){ // recebe 2 labels (true e false)
+Instr_list* compileBool(BoolExpr* e, char* label1, char* label2){ // recebe 2 labels (true e false)
   char* r1 = malloc(1024*sizeof(char));
   char* r2 = malloc(1024*sizeof(char));
-  char* label1 = malloc(1024*sizeof(char));
-  char* label2 = malloc(1024*sizeof(char));
   Instr_list* code1 = malloc(sizeof(struct ilist));
   Instr_list* code2 = malloc(sizeof(struct ilist));
   Instr_list* code3 = malloc(sizeof(struct ilist));
@@ -240,7 +237,7 @@ Instr_list* compileBool(BoolExpr* e, char* r){ // recebe 2 labels (true e false)
       return code4;
       break;
     case BOOLEANO:
-      r1 = r;
+      r1 = newTemp();
       code1 = mkInstrList(makeAtrib(makeVar(r1),makeInt(e->attr.value)),NULL);
       return code1;
       break;
@@ -251,7 +248,7 @@ Instr_list* compileBool(BoolExpr* e, char* r){ // recebe 2 labels (true e false)
   }
 }
 
-void execExpr(Instr_list* listExpr){
+void printInstrList(Instr_list* listExpr){
   //CONVERSAO MIPS PARA OUTRO FICHEIRO
   while(listExpr!= NULL){
     switch (listExpr->instr->ikind){
@@ -358,40 +355,43 @@ void execExpr(Instr_list* listExpr){
   }
 }
 
-// Instr* compileCmd(Cmd* command){
-//   Instr_list* instrlist = malloc(sizeof(Instr_list));
-//   switch (command->kind) {
-//     case E_ATRIB:
-//       instrlist = mkInstrList(makeAtrib(makeVar(command->attr.let.var),NULL);
-//       return instrlist;
-//       break;
-//
-//     case E_IF:
-//       break;
-//
-//     case E_IF_ELSE:
-//       break;
-//
-//     case E_WHILE:
-//       break;
-//
-//     case E_PRINT:
-//       break;
-//
-//     case E_PSTR:
-//       break;
-//
-//     case E_READ:
-//       break;
-//   }
-// }
-//
-// void compileCmdList(Cmd_list* cmdList){
-//   Instr_list* instrList = malloc(sizeof(Instr_list)); //Lista dos comandos convertida em instruções
-//   instrList = mkInstrList(compileCmd(cmdList->elem),NULL);
-//   cmdList=cmdList->next;
-//   while(cmdList!=NULL){
-//     instrList = appendInstrList(instrList,mkInstrList(compileCmd(cmdList->elem),NULL));
-//     cmdList = cmdList->next;
-//   }
-// }
+void compileCmdList(Cmd_list* cmdList){
+  Instr_list* instrList = malloc(sizeof(Instr_list)); //Lista dos comandos convertida em instruções
+  instrList = compileCmd(cmdList->elem);
+  cmdList=cmdList->next;
+  while(cmdList!=NULL){
+    instrList = appendInstrList(instrList,compileCmd(cmdList->elem));
+    cmdList = cmdList->next;
+  }
+}
+
+Instr_list* compileCmd(Cmd* command){
+  Instr_list* instrlist = malloc(sizeof(Instr_list));
+  char* registo;
+  switch (command->kind) {
+    case E_ATRIB:
+      registo = newTemp();
+      instrlist = mkInstrList(makeAtrib(makeVar(command->attr.let.var),makeVar(registo)),NULL);
+      instrlist = appendInstrList(instrlist,compileExpr(command->attr.let.value,registo));
+      return instrlist;
+      break;
+
+    case E_IF:
+      break;
+
+    case E_IF_ELSE:
+      break;
+
+    case E_WHILE:
+      break;
+
+    case E_PRINT:
+      break;
+
+    case E_PSTR:
+      break;
+
+    case E_READ:
+      break;
+  }
+}

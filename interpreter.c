@@ -27,12 +27,14 @@ int main(int argc, char** argv) {
   T2 = 2
   T3 = 3
   */
-  // Expr* e1 = ast_integer(1);
+  Expr* e1 = ast_integer(1);
   Expr* e3 = ast_integer(4);
   Expr* e5 = ast_integer(5);
+  Expr* var = ast_variable("x");
   BoolExpr* e6 = ast_exp(GT,e3,e5);
+  // Expr* e6 = ast_operation(MINUS,e3,e5);
   // Expr* e4 = ast_operation(PLUS,e1,e6);
-  execExpr(compileBool(e6,"t0"));
+  printInstrList(compileBool(e6,"t0","t1"));
   return 0;
 
 
