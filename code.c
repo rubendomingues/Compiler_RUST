@@ -40,6 +40,9 @@ void printAtom(Atom* a){
     case A_EMPTY:
       printf("VAZIO");
       break;
+    case A_REGISTER:
+      printf("%s", a->elem.name);
+      break;
     default:
       printf("ATOM ERROR!\n");
       break;
@@ -220,21 +223,21 @@ Instr_list* compileExpr(Expr* e, char* r){
       code2 = compileExpr(e->attr.op.right, r2);
       op = e->attr.op.operator;
       code3 = appendInstrList(code1,code2);
-      Atom* a1 = makeVar(r);
-      Atom* a2 = makeVar(r1);
-      Atom* a3 = makeVar(r2);
+      Atom* a1 = makeRegister(r);
+      Atom* a2 = makeRegister(r1);
+      Atom* a3 = makeRegister(r2);
       codeOp = mkInstrList(makeOperation(op,a1,a2,a3),NULL);
       code4 = appendInstrList(code3,codeOp);
       return code4;
       break;
     case E_INTEGER:
       r1 = r;
-      code1 = mkInstrList(makeAtrib(makeVar(r1),makeInt(e->attr.valueInt)),NULL);
+      code1 = mkInstrList(makeAtrib(makeRegister(r1),makeInt(e->attr.valueInt)),NULL);
       return code1;
       break;
     case E_STRING:
       r1 = r;
-      code1 = mkInstrList(makeAtrib(makeVar(r1),makeVar(e->attr.valueString)),NULL);
+      code1 = mkInstrList(makeAtrib(makeRegister(r1),makeVar(e->attr.valueString)),NULL);
       return code1;
       break;
     default:
@@ -263,15 +266,15 @@ Instr_list* compileBool(BoolExpr* e, char* label1, char* label2){ // recebe 2 la
       code2 = compileExpr(e->attr.op.right, r2);
       op = e->attr.op.operator;
       code3 = appendInstrList(code1,code2);
-      Atom* a1 = makeVar(r1);
-      Atom* a2 = makeVar(r2);
+      Atom* a1 = makeRegister(r1);
+      Atom* a2 = makeRegister(r2);
       codeOp = mkInstrList(makeIf(op,a1,a2,label1,label2),NULL);
       code4 = appendInstrList(code3,codeOp);
       return code4;
       break;
     case BOOLEANO:
       r1 = newTemp();
-      code1 = mkInstrList(makeAtrib(makeVar(r1),makeInt(e->attr.value)),NULL);
+      code1 = mkInstrList(makeAtrib(makeRegister(r1),makeInt(e->attr.value)),NULL);
       return code1;
       break;
     default:
@@ -307,7 +310,7 @@ Instr_list* compileCmd(Cmd* command){
   switch (command->kind) {
     case E_ATRIB:
       registo = newTemp();
-      instrlist = mkInstrList(makeAtrib(makeVar(command->attr.let.var),makeVar(registo)),NULL);
+      instrlist = mkInstrList(makeAtrib(makeVar(command->attr.let.var),makeRegister(registo)),NULL);
       instrlist = appendInstrList(compileExpr(command->attr.let.value,registo),instrlist);
       return instrlist;
       break;
@@ -359,20 +362,20 @@ Instr_list* compileCmd(Cmd* command){
 
     case E_PRINT:
       registo = newTemp();
-      instrlist = mkInstrList(makePrint(makeVar(command->attr.str),makeVar(registo)),NULL);
+      instrlist = mkInstrList(makePrint(makeVar(command->attr.str),makeRegister(registo)),NULL);
       return instrlist;
       break;
 
     case E_PSTR:
       registo = newTemp();
       registo2 = newTemp();
-      instrlist = mkInstrList(makePrintString(makeVar(command->attr.string_var.var),makeVar(registo),makeVar(command->attr.string_var.string),makeVar(registo2)),NULL);
+      instrlist = mkInstrList(makePrintString(makeVar(command->attr.string_var.var),makeRegister(registo),makeVar(command->attr.string_var.string),makeRegister(registo2)),NULL);
       return instrlist;
       break;
 
     case E_READ:
       registo = newTemp();
-      instrlist = mkInstrList(makeRead(makeVar(command->attr.str),makeVar(registo)),NULL);
+      instrlist = mkInstrList(makeRead(makeVar(command->attr.str),makeRegister(registo)),NULL);
       return instrlist;
       break;
   }
