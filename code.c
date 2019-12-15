@@ -1,6 +1,7 @@
 #include "code.h"
 int k=0;
 int labelnum=1;
+// int countString = 1;
 //Atom constructor
 Atom* makeVar(char* var){
   Atom* a = malloc(sizeof(Atom));
@@ -153,7 +154,16 @@ char* newTemp(){
   char* temp = malloc(1024*sizeof(char));
   sprintf(temp,"t%d",k);
   k++;
+  if(k==8)
+    k=0;
   // printf("%s\n",temp);
+  return temp;
+}
+
+char* newLabel(){
+  char* temp = malloc(1024*sizeof(char));
+  sprintf(temp,"label%d",labelnum);
+  labelnum++;
   return temp;
 }
 //List of instructions
@@ -215,8 +225,10 @@ Instr_list* compileExpr(Expr* e, char* r){
   Instr_list* codeOp = malloc(sizeof(struct ilist));
   Instr* instrOp = malloc(sizeof(Instr));
   int op;
+  int finalReg=0;
   switch(e->kind){
     case E_OPERATION:
+      finalReg = k;
       r1 = newTemp();
       r2 = newTemp();
       code1 = compileExpr(e->attr.op.left, r1);
@@ -228,6 +240,7 @@ Instr_list* compileExpr(Expr* e, char* r){
       Atom* a3 = makeRegister(r2);
       codeOp = mkInstrList(makeOperation(op,a1,a2,a3),NULL);
       code4 = appendInstrList(code3,codeOp);
+      k = finalReg;
       return code4;
       break;
     case E_INTEGER:
@@ -247,7 +260,6 @@ Instr_list* compileExpr(Expr* e, char* r){
   }
 }
 
-// //NOT FINISHED
 Instr_list* compileBool(BoolExpr* e, char* label1, char* label2){ // recebe 2 labels (true e false)
   char* r1 = malloc(1024*sizeof(char));
   char* r2 = malloc(1024*sizeof(char));
@@ -258,8 +270,10 @@ Instr_list* compileBool(BoolExpr* e, char* label1, char* label2){ // recebe 2 la
   Instr_list* codeOp = malloc(sizeof(struct ilist));
   Instr* instrOp = malloc(sizeof(Instr));
   int op;
+  int finalReg = 0;
   switch(e->kind){
     case EXP:
+      finalReg = k;
       r1 = newTemp();
       r2 = newTemp();
       code1 = compileExpr(e->attr.op.left, r1);
@@ -270,6 +284,7 @@ Instr_list* compileBool(BoolExpr* e, char* label1, char* label2){ // recebe 2 la
       Atom* a2 = makeRegister(r2);
       codeOp = mkInstrList(makeIf(op,a1,a2,label1,label2),NULL);
       code4 = appendInstrList(code3,codeOp);
+      k = finalReg;
       return code4;
       break;
     case BOOLEANO:
@@ -277,6 +292,7 @@ Instr_list* compileBool(BoolExpr* e, char* label1, char* label2){ // recebe 2 la
       code1 = mkInstrList(makeAtrib(makeRegister(r1),makeInt(e->attr.value)),NULL);
       return code1;
       break;
+
     default:
       printf("ERROR");
       break;
@@ -316,10 +332,8 @@ Instr_list* compileCmd(Cmd* command){
       break;
 
     case E_IF:
-      sprintf(label1,"label%d",labelnum);
-      labelnum++;
-      sprintf(label2,"label%d",labelnum);
-      labelnum++;
+      label1 = newLabel();
+      label2 = newLabel();
       instrlist = compileBool(command->attr.ifT.cond,label1,label2);
       instrlist = appendInstrList(instrlist,mkInstrList(makelabel(label1),NULL));
       instrlist = appendInstrList(instrlist,compileCmdList(command->attr.ifT.list));
@@ -328,12 +342,9 @@ Instr_list* compileCmd(Cmd* command){
       break;
 
     case E_IF_ELSE:
-      sprintf(label1,"label%d",labelnum);
-      labelnum++;
-      sprintf(label2,"label%d",labelnum);
-      labelnum++;
-      sprintf(label3,"label%d",labelnum);
-      labelnum++;
+      label1 = newLabel();
+      label2 = newLabel();
+      label3 = newLabel();
       instrlist = compileBool(command->attr.if_else.cond,label1,label2);
       instrlist = appendInstrList(instrlist,mkInstrList(makelabel(label1),NULL));
       instrlist = appendInstrList(instrlist,compileCmdList(command->attr.if_else.comando_if));
@@ -345,12 +356,9 @@ Instr_list* compileCmd(Cmd* command){
       break;
 
     case E_WHILE:
-      sprintf(label1,"label%d",labelnum);
-      labelnum++;
-      sprintf(label2,"label%d",labelnum);
-      labelnum++;
-      sprintf(label3,"label%d",labelnum);
-      labelnum++;
+      label1 = newLabel();
+      label2 = newLabel();
+      label3 = newLabel();
       instrlist = mkInstrList(makelabel(label1),NULL);
       instrlist = appendInstrList(instrlist,compileBool(command->attr.whileT.cond,label2,label3));
       instrlist = appendInstrList(instrlist,mkInstrList(makelabel(label2),NULL));
@@ -361,20 +369,20 @@ Instr_list* compileCmd(Cmd* command){
       break;
 
     case E_PRINT:
-      registo = newTemp();
+      // registo = newTemp();
       instrlist = mkInstrList(makePrint(makeVar(command->attr.str),makeRegister(registo)),NULL);
       return instrlist;
       break;
 
     case E_PSTR:
-      registo = newTemp();
-      registo2 = newTemp();
+      // registo = newTemp();
+      // registo2 = newTemp();
       instrlist = mkInstrList(makePrintString(makeVar(command->attr.string_var.var),makeRegister(registo),makeVar(command->attr.string_var.string),makeRegister(registo2)),NULL);
       return instrlist;
       break;
 
     case E_READ:
-      registo = newTemp();
+      // registo = newTemp();
       instrlist = mkInstrList(makeRead(makeVar(command->attr.str),makeRegister(registo)),NULL);
       return instrlist;
       break;
@@ -508,16 +516,16 @@ void printInstrList(Instr_list* listExpr){
       case I_READ:
         printf("READ ");
         printAtom(listExpr->instr->attr.read.a1);
-        printf(" ");
-        printAtom(listExpr->instr->attr.read.a2);
+        // printf(" ");
+        // printAtom(listExpr->instr->attr.read.a2);
         printf("\n");
         break;
 
       case I_PRINT:
         printf("PRINT ");
         printAtom(listExpr->instr->attr.print.a1);
-        printf(" ");
-        printAtom(listExpr->instr->attr.print.a2);
+        // printf(" ");
+        // printAtom(listExpr->instr->attr.print.a2);
         printf("\n");
         break;
 
@@ -525,11 +533,11 @@ void printInstrList(Instr_list* listExpr){
         printf("PRINT ");
         printAtom(listExpr->instr->attr.print2.a1);
         printf(" ");
-        printAtom(listExpr->instr->attr.print2.a2);
-        printf(" ");
+        // printAtom(listExpr->instr->attr.print2.a2);
+        // printf(" ");
         printAtom(listExpr->instr->attr.print2.a3);
-        printf(" ");
-        printAtom(listExpr->instr->attr.print2.a4);
+        // printf(" ");
+        // printAtom(listExpr->instr->attr.print2.a4);
         printf("\n");
         break;
       default:
@@ -540,164 +548,145 @@ void printInstrList(Instr_list* listExpr){
   }
 }
 
-void printMips(Instr_list* listExpr){
-  FILE *fp = fopen("mips.txt","ab+");
+void printMipsData(FILE* fp){
+  fprintf(fp,".data:\n");
+  // char* temp = malloc(1024*sizeof(char));
+  // int countS = 1;
+  for(int i=0; i<1024; i++){
+    if(table[i]==NULL)
+      continue;
+    LIST p = table[i];
+    while(p){
+      if(strcmp(p->type,"text")==0){
+        fprintf(fp, "  ");
+        for(int i=1; i<strlen(p->key)-1; i++){
+          fprintf(fp, "%c",p->key[i]);
+        }
+        // sprintf(temp,"string%d",countS);
+        // countS++;
+        // fprintf(fp,"%s",temp);
+        fprintf(fp,": .askii %s\n",p->key);
+      }
+      else
+        fprintf(fp,"  %s: .space 4\n",p->key);
+      p = p->next;
+    }
+  }
+  fprintf(fp,"\n.text:\n");
+  fprintf(fp,"  main:\n");
+}
+void printMips(Instr_list* listExpr, FILE* fp){
+  // char* stringT = malloc(1024*sizeof(char));
   //CONVERSAO MIPS PARA OUTRO FICHEIRO
   while(listExpr!=NULL){
     switch (listExpr->instr->ikind){
       case I_ATRIB:
-        printAtom(listExpr->instr->attr.atrib.a1);
-        printf(" = ");
-        printAtom(listExpr->instr->attr.atrib.a2);
-        printf("\n");
+        fprintf(fp, "   ");
+        if(listExpr->instr->attr.atrib.a1->kind == A_REGISTER){
+          if(listExpr->instr->attr.atrib.a2->kind == A_STRING)
+            fprintf(fp, "la $%s, %s\n", listExpr->instr->attr.atrib.a1->elem.name,listExpr->instr->attr.atrib.a2->elem.name);
+          else if(listExpr->instr->attr.atrib.a2->kind == A_INT)
+            fprintf(fp, "li $%s, %d\n", listExpr->instr->attr.atrib.a1->elem.name,listExpr->instr->attr.atrib.a2->elem.val);
+        }
+        else if(listExpr->instr->attr.atrib.a1->kind == A_STRING)
+          fprintf(fp, "sw %s, $%s\n", listExpr->instr->attr.atrib.a1->elem.name, listExpr->instr->attr.atrib.a2->elem.name);
         break;
 
       case I_PLUS:
-        printAtom(listExpr->instr->attr.op.a1);
-        printf(" = ");
-        printAtom(listExpr->instr->attr.op.a2);
-        printf(" + ");
-        printAtom(listExpr->instr->attr.op.a3);
-        printf("\n");
+        fprintf(fp, "   ");
+        fprintf(fp,"add $%s,$%s,$%s\n",listExpr->instr->attr.op.a1->elem.name,listExpr->instr->attr.op.a2->elem.name,listExpr->instr->attr.op.a3->elem.name);
         break;
 
       case I_MINUS:
-        printAtom(listExpr->instr->attr.op.a1);
-        printf(" = ");
-        printAtom(listExpr->instr->attr.op.a2);
-        printf(" - ");
-        printAtom(listExpr->instr->attr.op.a3);
-        printf("\n");
+        fprintf(fp, "   ");
+        fprintf(fp,"sub $%s,$%s,$%s\n",listExpr->instr->attr.op.a1->elem.name,listExpr->instr->attr.op.a2->elem.name,listExpr->instr->attr.op.a3->elem.name);
         break;
 
       case I_DIV:
-        printAtom(listExpr->instr->attr.op.a1);
-        printf(" = ");
-        printAtom(listExpr->instr->attr.op.a2);
-        printf(" / ");
-        printAtom(listExpr->instr->attr.op.a3);
-        printf("\n");
+        fprintf(fp, "   ");
+        fprintf(fp,"div $%s,$%s,$%s\n",listExpr->instr->attr.op.a1->elem.name,listExpr->instr->attr.op.a2->elem.name,listExpr->instr->attr.op.a3->elem.name);
         break;
 
       case I_MULT:
-        printAtom(listExpr->instr->attr.op.a1);
-        printf(" = ");
-        printAtom(listExpr->instr->attr.op.a2);
-        printf(" * ");
-        printAtom(listExpr->instr->attr.op.a3);
-        printf("\n");
+        fprintf(fp, "   ");
+        fprintf(fp,"mul $%s,$%s,$%s\n",listExpr->instr->attr.op.a1->elem.name,listExpr->instr->attr.op.a2->elem.name,listExpr->instr->attr.op.a3->elem.name);
         break;
 
       case I_IFG:
-        printf("IF ");
-        printAtom(listExpr->instr->attr.i_if.a1);
-        printf(" GT ");
-        printAtom(listExpr->instr->attr.i_if.a2);
-        printf(" THEN ");
-        printf("%s", listExpr->instr->attr.i_if.label1);
-        printf(" ELSE ");
-        printf("%s", listExpr->instr->attr.i_if.label2);
-        printf("\n");
+        fprintf(fp, "   ");
+        fprintf(fp, "ble $%s,$%s,%s\n", listExpr->instr->attr.i_if.a1->elem.name,listExpr->instr->attr.i_if.a2->elem.name,listExpr->instr->attr.i_if.label2);
         break;
       case I_IFL:
-        printf("IF ");
-        printAtom(listExpr->instr->attr.i_if.a1);
-        printf(" LT ");
-        printAtom(listExpr->instr->attr.i_if.a2);
-        printf(" THEN ");
-        printf("%s", listExpr->instr->attr.i_if.label1);
-        printf(" ELSE ");
-        printf("%s", listExpr->instr->attr.i_if.label2);
-        printf("\n");
+        fprintf(fp, "   ");
+        fprintf(fp, "bge $%s,$%s,%s\n", listExpr->instr->attr.i_if.a1->elem.name,listExpr->instr->attr.i_if.a2->elem.name,listExpr->instr->attr.i_if.label2);
         break;
       case I_IFGE:
-        printf("IF ");
-        printAtom(listExpr->instr->attr.i_if.a1);
-        printf(" GTE ");
-        printAtom(listExpr->instr->attr.i_if.a2);
-        printf(" THEN ");
-        printf("%s", listExpr->instr->attr.i_if.label1);
-        printf(" ELSE ");
-        printf("%s", listExpr->instr->attr.i_if.label2);
-        printf("\n");
+        fprintf(fp, "   ");
+        fprintf(fp, "blt $%s,$%s,%s\n", listExpr->instr->attr.i_if.a1->elem.name,listExpr->instr->attr.i_if.a2->elem.name,listExpr->instr->attr.i_if.label2);
         break;
 
       case I_IFLE:
-        printf("IF ");
-        printAtom(listExpr->instr->attr.i_if.a1);
-        printf(" LTE ");
-        printAtom(listExpr->instr->attr.i_if.a2);
-        printf(" THEN ");
-        printf("%s", listExpr->instr->attr.i_if.label1);
-        printf(" ELSE ");
-        printf("%s", listExpr->instr->attr.i_if.label2);
-        printf("\n");
+        fprintf(fp, "   ");
+        fprintf(fp, "bgt $%s,$%s,%s\n", listExpr->instr->attr.i_if.a1->elem.name,listExpr->instr->attr.i_if.a2->elem.name,listExpr->instr->attr.i_if.label2);
         break;
 
       case I_IFEQ:
-        printf("IF ");
-        printAtom(listExpr->instr->attr.i_if.a1);
-        printf(" EQ ");
-        printAtom(listExpr->instr->attr.i_if.a2);
-        printf(" THEN ");
-        printf("%s", listExpr->instr->attr.i_if.label1);
-        printf(" ELSE ");
-        printf("%s", listExpr->instr->attr.i_if.label2);
-        printf("\n");
+        fprintf(fp, "   ");
+        fprintf(fp, "bne $%s,$%s,%s\n", listExpr->instr->attr.i_if.a1->elem.name,listExpr->instr->attr.i_if.a2->elem.name,listExpr->instr->attr.i_if.label2);
         break;
 
       case I_IFNEQ:
-        printf("IF ");
-        printAtom(listExpr->instr->attr.i_if.a1);
-        printf(" NEQ ");
-        printAtom(listExpr->instr->attr.i_if.a2);
-        printf(" THEN ");
-        printf("%s", listExpr->instr->attr.i_if.label1);
-        printf(" ELSE ");
-        printf("%s", listExpr->instr->attr.i_if.label2);
-        printf("\n");
+        fprintf(fp, "   ");
+        fprintf(fp, "beq $%s,$%s,%s\n", listExpr->instr->attr.i_if.a1->elem.name,listExpr->instr->attr.i_if.a2->elem.name,listExpr->instr->attr.i_if.label2);
         break;
 
       case I_LABEL:
-        printf("%s \n",listExpr->instr->attr.label.label1);
+        fprintf(fp, "   ");
+        fprintf(fp, "%s:\n", listExpr->instr->attr.label.label1);
         break;
 
       case I_GOTO:
-        printf("GOTO %s\n", listExpr->instr->attr.i_goto.label1);
+        fprintf(fp, "   ");
+        fprintf(fp, "j %s\n", listExpr->instr->attr.i_goto.label1);
         break;
 
       case I_READ:
-        printf("READ ");
-        printAtom(listExpr->instr->attr.read.a1);
-        printf(" ");
-        printAtom(listExpr->instr->attr.read.a2);
-        printf("\n");
+        fprintf(fp, "   li $v0, 5\n");
+        fprintf(fp, "   syscall\n");
+        fprintf(fp, "   sw %s, $v0\n", listExpr->instr->attr.read.a1->elem.name);
         break;
 
       case I_PRINT:
-        printf("PRINT ");
-        printAtom(listExpr->instr->attr.print.a1);
-        printf(" ");
-        printAtom(listExpr->instr->attr.print.a2);
-        printf("\n");
+        fprintf(fp, "   li $v0, 4\n");
+        fprintf(fp, "   la $a0, ");
+        for(int i=1; i<strlen(listExpr->instr->attr.print.a1->elem.name)-1; i++)
+          fprintf(fp,"%c",listExpr->instr->attr.print.a1->elem.name[i]);
+        // sprintf(stringT, "string%d",countString);
+        // countString++;
+        // fprintf(fp,"%s",stringT);
+        fprintf(fp,"\n");
+        fprintf(fp, "   syscall\n");
         break;
 
       case I_PRINTS:
-        printf("PRINT ");
-        printAtom(listExpr->instr->attr.print2.a1);
-        printf(" ");
-        printAtom(listExpr->instr->attr.print2.a2);
-        printf(" ");
-        printAtom(listExpr->instr->attr.print2.a3);
-        printf(" ");
-        printAtom(listExpr->instr->attr.print2.a4);
-        printf("\n");
+        fprintf(fp, "   li $v0, 4\n");
+        fprintf(fp, "   la $a0, ");
+        for(int i=1; i<strlen(listExpr->instr->attr.print2.a3->elem.name)-1; i++)
+          fprintf(fp,"%c",listExpr->instr->attr.print2.a3->elem.name[i]);
+        // sprintf(stringT, "string%d",countString);
+        // countString++;
+        // fprintf(fp,"%s",stringT);
+        fprintf(fp,"\n");
+        fprintf(fp, "   syscall\n");
+        fprintf(fp, "   li $v0, 5\n");
+        fprintf(fp, "   la $a0, %s\n", listExpr->instr->attr.print2.a1->elem.name);
+        fprintf(fp, "   syscall\n");
         break;
+
       default:
         printf("execExpr ERROR\n");
         break;
     }
     listExpr = listExpr->next;
   }
-  fclose(fp);
 }

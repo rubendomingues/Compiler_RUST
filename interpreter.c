@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "parser.h"
 #include "printAbsTree.h"
-#include "hash.h"
+#include "hashMips.h"
 #include "code.h"
 
 int main(int argc, char** argv) {
@@ -14,27 +14,19 @@ int main(int argc, char** argv) {
       printf("'%s': could not open file\n", *argv);
       return 1;
     }
-  } //  yyin = stdin
+  }
   if (yyparse() == 0) {
     // printf("fn main()\n");
     // cmdListPrint(root, 0);
     Instr_list* list = compileCmdList(root);
     printInstrList(list);
+    remove("mips.txt");
+    FILE *fp = fopen("mips.txt","ab+");
+    printMipsData(fp);
+    printMips(list,fp);
+    fclose(fp);
   }
-  // 2 + 3
-  // /*
-  // T1 = T2 + T3
-  // T2 = 2
-  // T3 = 3
-  // */
-  // Expr* e1 = ast_integer(1);
-  // Expr* e3 = ast_integer(4);
-  // Expr* e5 = ast_integer(5);
-  // Expr* var = ast_variable("x");
-  // BoolExpr* e6 = ast_exp(GT,e3,e5);
-  // // Expr* e6 = ast_operation(MINUS,e3,e5);
-  // // Expr* e4 = ast_operation(PLUS,e1,e6);
-  // printInstrList(compileBool(e6,"t0","t1"));
+
   return 0;
 
 

@@ -70,7 +70,7 @@
   #include <stdio.h>
   #include <stdlib.h>
   #include "ast.h"
-  #include "hash.h"
+  #include "hashMips.h"
 
   extern int yylex();
   extern int yyline;
@@ -85,6 +85,10 @@ program: FUNC MAIN OPENPAR CLOSEPAR KEY1 cmdlist KEY2 { root = $6; }
 expr:
   VAR {
     $$ = ast_variable($1);
+    if(!lookup($1)){
+      yyerror("variavel not defined");
+      return 1;
+    }
   }
   |
   INT {
@@ -173,7 +177,9 @@ bool_expr:
 cmd:
   ATRIB VAR TOKEN_EQ expr SM {
     $$ = ast_ATRIB($2,$4);
-    insert($2,$4);
+    if(!lookup($2)){
+      insert($2,"var");
+    }
   }
   |
   IF bool_expr KEY1 cmdlist KEY2 {
@@ -190,14 +196,24 @@ cmd:
   |
   READ OPENPAR COM VAR CLOSEPAR SM{
     $$ = ast_READ($4);
+    if(!lookup($4))
+      insert($4,"var");
   }
   |
   PRINT OPENPAR STRING CLOSEPAR SM{
     $$ = ast_PRINT($3);
+    if(!lookup($3))
+      insert($3,"text");
   }
   |
   PRINT OPENPAR STRING VIRG VAR CLOSEPAR SM{
     $$ = ast_PRINT_STRING($3,$5);
+    if(!lookup($5)){
+      yyerror("variavel not defined");
+      return 1;
+    }
+    if(!lookup($3))
+      insert($3,"text");
   }
   ;
 

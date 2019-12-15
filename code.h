@@ -93,6 +93,7 @@ Instr_list* compileBool(BoolExpr* e, char* label1, char* label2);
 Instr_list* compileExpr(Expr* e, char* r);
 Instr_list* compileCmdList(Cmd_list* cmdList);
 void printInstrList(Instr_list* listExpr);
-void printMips(Instr_list* listExpr);
+void printMips(Instr_list* listExpr,FILE* fp);
+void printMipsData(FILE* fp);
 
 #endif
